@@ -46,13 +46,13 @@ fn main() {
     // println!("profile:  {}", profile);
     // println!("role:     {}", role);
 
-    insert_user(&connection,
-                name,
-                email,
-                password,
-                date,
-                Some(profile),
-                Some(role));
+    //insert_user(&connection,
+    //            name,
+    //            email,
+    //            password,
+    //            date,
+    //            Some(profile),
+    //            Some(role));
 
 
 
