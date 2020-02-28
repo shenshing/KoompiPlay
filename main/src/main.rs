@@ -1,23 +1,37 @@
+#![feature(proc_macro_hygiene, decl_macro)]
+
+#[macro_use] extern crate rocket;
+
+
 extern crate userInfo;
 // mod users;
 // use userInfo::hello;
 use userInfo::establish_connection;
 use userInfo::insert_user;
+use userInfo::register;
 
 extern crate diesel;
 use self::userInfo::*;
 use self::models::*;
 use self::diesel::prelude::*;
 
+
 use chrono::offset::Utc;
+use chrono::offset::Local;
+
 
 fn main() {
+
+    rocket::ignite()
+        .mount("/", routes![register])
+        .launch();
+
     // println!("Hello, world!");
     // hello();
-    use userInfo::schema::users::dsl::*;
+    // use userInfo::schema::users::dsl::*;
     // use users::schema;
 
-    let connection = establish_connection();
+    // let connection = establish_connection();
 //show_user
 
 //     let user_result = users.load::<User>(&connection)
@@ -32,12 +46,12 @@ fn main() {
 // 
 
 //insert_user
-    let name = String::from("shenshing");
-    let email = String::from("shing@gmail.com");
-    let password = String::from("123");
-    let date = Utc::now().naive_utc();
-    let profile = String::from("userProfile");
-    let role = String::from("Admin");
+    // let name = String::from("shenshing");
+    // let email = String::from("shing@gmail.com");
+    // let password = String::from("123");
+    // let date = Local::now();
+    // let profile = String::from("userProfile");
+    // let role = String::from("Admin");
 
     // println!("name:     {}", name);
     // println!("email:    {}", email);
