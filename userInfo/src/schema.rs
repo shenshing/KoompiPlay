@@ -22,6 +22,7 @@ table! {
         create_date -> Varchar,
         user_profile -> Nullable<Varchar>,
         user_role -> Nullable<Varchar>,
+        phone_number -> Nullable<Varchar>,
     }
 }
 
