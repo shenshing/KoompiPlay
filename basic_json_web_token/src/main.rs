@@ -1,0 +1,170 @@
+extern crate jsonwebtoken;
+use jsonwebtoken::Header;
+use jsonwebtoken::{EncodingKey, DecodingKey};
+use jsonwebtoken::Algorithm;
+use jsonwebtoken::Validation;
+use jsonwebtoken::TokenData;
+
+extern crate chrono;
+use chrono::DateTime;
+use chrono::Utc;
+
+
+use serde::{Serialize, Deserialize};
+#[derive(Debug, Serialize, Deserialize)]
+struct Claims {
+    aud: String ,        // Optional. Audience
+    #[serde(with = "jwt_numeric_date")]
+    exp: DateTime<Utc>, // Required (validate_exp defaults to true in validation). Expiration time
+    #[serde(with = "jwt_numeric_date")]
+    iat: DateTime<Utc>,  // Optional. Issued at
+    iss: String,       // Optional. Issuer
+    #[serde(with = "jwt_numeric_date")]
+    nbf: DateTime<Utc>,  // Optional. Not Before
+    sub: String,        // Optional. Subject (whom token refers to)
+    user: String,
+    password: String,
+}
+
+mod jwt_numeric_date {
+    //! Custom serialization of DateTime<Utc> to conform with the JWT spec (RFC 7519 section 2, "Numeric Date")
+    use chrono::{DateTime, TimeZone, Utc};
+    use serde::{self, Deserialize, Deserializer, Serializer};
+
+    /// Serializes a DateTime<Utc> to a Unix timestamp (milliseconds since 1970/1/1T00:00:00T)
+    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let timestamp = date.timestamp();
+        serializer.serialize_i64(timestamp)
+    }
+
+    /// Attempts to deserialize an i64 and use as a Unix timestamp
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Utc.timestamp_opt(i64::deserialize(deserializer)?, 0)
+            .single() // If there are multiple or no valid DateTimes from timestamp, return None
+            .ok_or_else(|| serde::de::Error::custom("invalid Unix timestamp value"))
+    }
+
+    #[cfg(test)]
+    mod tests {
+        const EXPECTED_TOKEN: &str = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJDdXN0b20gRGF0ZVRpbWUgc2VyL2RlIiwiaWF0IjowLCJleHAiOjMyNTAzNjgwMDAwfQ.RTgha0S53MjPC2pMA4e2oMzaBxSY3DMjiYR2qFfV55A";
+
+        use super::super::{Claims, SECRET};
+
+        #[test]
+        fn round_trip() {
+            let sub = "Custom DateTime ser/de".to_string();
+            let iat = Utc.timestamp(0, 0);
+            let exp = Utc.timestamp(32503680000, 0);
+
+            let claims = Claims { sub: sub.clone(), iat, exp };
+
+            let token =
+                encode(&Header::default(), &claims, &EncodingKey::from_secret(SECRET.as_ref()))
+                    .expect("Failed to encode claims");
+
+            assert_eq!(&token, EXPECTED_TOKEN);
+
+            let decoded = decode::<Claims>(
+                &token,
+                &DecodingKey::from_secret(SECRET.as_ref()),
+                &Validation::default(),
+            )
+            .expect("Failed to decode token");
+
+            assert_eq!(decoded.claims, claims);
+        }
+
+        #[test]
+        fn should_fail_on_invalid_timestamp() {
+            // A token with the expiry of i64::MAX + 1
+            let overflow_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJDdXN0b20gRGF0ZVRpbWUgc2VyL2RlIiwiaWF0IjowLCJleHAiOjkyMjMzNzIwMzY4NTQ3NzYwMDB9.G2PKreA27U8_xOwuIeCYXacFYeR46f9FyENIZfCrvEc";
+
+            let decode_result =
+                decode::<Claims>(&overflow_token, SECRET.as_ref(), &Validation::default());
+
+            assert!(decode_result.is_err());
+        }
+    }
+}
+// use chrono::Utc;
+
+fn main() {
+    // println!("Hello, world!");
+    let time = Utc::now();
+    // let my_claims = Claims {
+    //     aud: String::from("aud"),
+    //     exp: Default::default(),
+    //     iat: Default::default(),
+    //     iss: String::from("iss"),
+    //     nbf: Default::default(),
+    //     sub: String::from("sub"),
+    // };
+
+//Token
+    let my_claims = Claims {
+        aud: String::from("aud"),
+        exp: time,
+        iat: time,
+        iss: String::from("iss"),
+        nbf: time,
+        sub: String::from("sub"),
+        user: String::from("admin"),
+        password: String::from("123")
+    };
+
+    let token = jsonwebtoken::encode(&Header::default(), &my_claims, &EncodingKey::from_secret("secret".as_ref())).unwrap();
+
+    // println!("{}", token);
+    let claims = jsonwebtoken::decode::<Claims>(&token, &DecodingKey::from_secret("secret".as_ref()), &Validation::default()).unwrap();
+    println!("claims : {:#?}", claims);
+    println!("-----------");
+    let validation = Validation {
+        algorithms: vec![Algorithm::HS256],
+        ..Default::default()
+    };
+    // let header = jsonwebtoken::decode::<Header>(&token, &DecodingKey::from_secret("secret".as_ref()), &validation).unwrap();
+    // println!("token : {:#?}", header);
+
+    let header = jsonwebtoken::decode_header(&token).unwrap();
+    // println!("{:#?}", header);
+    // println!("header type : {:?}", header.typ);
+    // println!("aud : {}", claims.aud);
+    println!("user : {}", claims.claims.user);
+    println!("password: {}", claims.claims.password);
+
+//Header
+    // let mut header = Header::new(Algorithm::HS512);
+    // let header = Header::default();
+    // header.typ = Some(String::from("typ"));
+    // header.alg = Algorithm::HS512;
+    // header.cty = Some("cty".to_owned());
+    // header.jku = Some("jku".to_owned());
+    // header.kid = Some("kid".to_owned());
+    // header.x5u = Some("x5u".to_owned());
+    // header.x5t = Some("x5t".to_owned());
+    // println!("{:#?}", header);
+/*
+    let validation = Validation::default();
+    println!("validation : {:#?}", validation);
+
+    let validation = Validation::new(Algorithm::HS512);
+    println!("validation : {:#?}", validation);
+
+    let mut validation = Validation {
+        leeway: 60,
+        ..Default::default()
+    };
+    println!("validation : {:#?}", validation);
+
+    let mut validation = Validation::default();
+    validation.set_audience(&["Me", "You"]);
+    println!("validation : {:#?}", validation);
+*/
+
+}
