@@ -4,8 +4,6 @@
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
-// extern crate userInfo;
-
 
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
@@ -60,7 +58,7 @@ use email_addr::{Validate_Email, valid_email};
 #[post("/register", data = "<user>")]
 pub fn register(user: Json<User>) { 
     let connection = establish_connection();
-
+    
     let new_user = User {
         user_name:      user.user_name.to_string(),
         user_email:     user.user_email.to_string(),
@@ -73,10 +71,6 @@ pub fn register(user: Json<User>) {
     insert_user(&connection, new_user);
 }
 
-enum LogIn {
-    Success,
-    Failed,
-}
 use self::models::{loginInfo};
 #[post("/login", data = "<log_info>")]
 pub fn login(log_info: Json<loginInfo>) -> String {
@@ -90,17 +84,43 @@ pub fn login(log_info: Json<loginInfo>) -> String {
     for _user in user_list.iter() {
         if(_user.user_name.trim() == log_info.user_name.trim()) {
             if(_user.user_password.trim() == log_info.user_password.trim()) {
-                string = format!("Log in Successful");
+                string = generate_token(_user.user_name.to_string(), _user.user_password.to_string());
+
                 break;
             } else {
-                string = format!("Log in Failed");
+                string = format!("Log in Failed");  
             }
         } else {
             string = format!("Log in Failed");
         }
     }
     return string;
+    //after login successfully need to return a token for next verification
+}
+
+extern crate jsonwebtoken;
+use jsonwebtoken::Header;
+extern crate chrono;
+use chrono::Utc;
+use self::token::Claims;
+pub fn generate_token(login_name: String, login_password: String) -> String {
+    let time = Utc::now();
+
+    let claims = Claims {
+        aud:        String::from("koompiPlay"),
+        exp:        time,
+        iat:        time,
+        iss:        String::from("Admin"),
+        sub:        String::from("login"),
+        user:       login_name,
+        password:   login_password, 
+    };
+
+    let token = jsonwebtoken::encode(&Header::default(), &claims, "secret".as_ref()).unwrap();
+    // return token;
+    return token;
 }
 
 pub mod schema;
 pub mod models;
+pub mod token;
