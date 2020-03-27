@@ -20,7 +20,6 @@ pub struct User {
 
 
 #[derive(Queryable, Deserialize, PartialEq)]
-// #[table_name="users"]
 pub struct _User {
     pub user_id:        i32,
     pub user_name:      String,
@@ -72,5 +71,33 @@ impl FromDataSimple for loginInfo {
         };
         
         Success(login_info)
+    }
+}
+
+#[derive(Deserialize)]
+pub struct updateItem {
+    pub token:          String,
+    pub newName:        String,
+    pub newPassword:    String,
+    pub newProfile:     String,
+    pub newRole:        String,
+    pub newPhone:       String
+}
+
+impl FromDataSimple for updateItem {
+    type Error = String;
+
+    fn from_data(req: &Request, data: Data) -> data::Outcome<Self, String> {
+
+        let update_info = updateItem {
+            token:  String::from("ok"),
+            newName: String::from("ok"),
+            newPassword: String::from("ok"),
+            newProfile: String::from("ok"),
+            newRole: String::from("ok"),
+            newPhone: String::from("ok"),
+        };
+        
+        Success(update_info)
     }
 }

@@ -9,16 +9,30 @@ use userInfo::insert_user;
 
 extern crate diesel;
 use self::userInfo::*;
-use userInfo::login;
-
+// use userInfo::{login, 
+//                admin_dashboard, 
+//                user_dashboard, 
+//                error_dashboard, 
+//                check_user_role,
+//                self_destroy,
+//                updateName};
 
 fn main() {
 
     rocket::ignite()
-        .mount("/", routes![register, login])
+        .mount("/", routes![register, 
+                            login, 
+                            admin_dashboard, 
+                            user_dashboard, 
+                            error_dashboard,
+                            check_user_role,
+                            self_destroy,
+                            updateName,
+                            updatePassword,
+                            updateProfile,
+                            updateRole,
+                            updatePhone])
         .launch();
 
-    // let connection = establish_connection();
-    // get_user(&connection);
 }
 

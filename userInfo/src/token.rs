@@ -21,8 +21,9 @@ pub struct Claims {
     // #[serde(with = "jwt_numeric_date")]
     // nbf: DateTime<Utc>,  // Optional. Not Before
     pub sub: String,        // Optional. Subject (whom token refers to)
-    pub user: String,
-    pub password: String,
+    pub user_name: String,
+    pub user_password: String,
+    pub user_role: String
 }
 
 mod jwt_numeric_date {
@@ -92,6 +93,30 @@ mod jwt_numeric_date {
     }
 }
 
-// pub fn hello_world() {
-//     println!("Hello World");
-// }
+use chrono::Duration;
+pub fn generate_token(login_name: String, login_password: String, login_role: String) -> String {
+    let issue_time: DateTime<Utc> = Utc::now();
+    //declare 1day durations
+    let duration = Duration::days(164);
+    let expire_time = issue_time.checked_add_signed(duration).unwrap();
+
+    let claims = Claims {
+        aud:            String::from("koompiPlay"),
+        exp:            expire_time,
+        iat:            issue_time,
+        iss:            String::from("koompiPlay"),
+        sub:            String::from("login"),
+        user_name:      login_name,
+        user_password:  login_password, 
+        user_role:      login_role,
+    };
+
+    let token = jsonwebtoken::encode(&Header::default(), &claims, "secret".as_ref()).unwrap();
+    return token;
+}
+
+pub fn decode_token(token: String) -> jsonwebtoken::TokenData<Claims> {
+    let ok_token = &token[6..];
+    println!("{}", ok_token);
+    jsonwebtoken::decode::<Claims>(&ok_token, "secret".as_ref(), &Validation::default()).unwrap()
+}
