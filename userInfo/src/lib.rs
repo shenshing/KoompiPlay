@@ -19,25 +19,28 @@ pub fn establish_connection() -> PgConnection {
         .expect(&format!("Error connecting to {}", database_url))
 }
 
-
+use self::email_addr::DuplicateEmail;
 use self::models::{User};
-pub fn insert_user(conn: &PgConnection, user: User) {
+pub fn insert_user(conn: &PgConnection, user: User) -> DuplicateEmail {
     use schema::users;
-
+    
     let new_user = User {
         user_name:      user.user_name,
+        user_gender:    user.user_gender.clone(),
         user_email:     user.user_email,
         user_password:  user.user_password,
-        create_date:    user.create_date,
-        user_profile:   user.user_profile,
+        user_profile:   Some(set_default_profile(user.user_gender.clone())),
         user_role:      user.user_role,
         phone_number:   user.phone_number,
     };
 
-    diesel::insert_into(users::table)
+    let insert_result = match diesel::insert_into(users::table)
         .values(&new_user)
-        .execute(conn)
-        .expect("Error saving new user");
+        .execute(conn) {
+            Ok(ok) => DuplicateEmail::Exist,
+            Err(err) => DuplicateEmail::Nonexist,
+    };
+    return insert_result;
 }
 
 use self::models::{_User};
@@ -149,6 +152,16 @@ pub fn update_phone(userName: String, userPassword: String, newUserPhone: String
     }
 }
 
+pub fn set_default_profile(gender: String) -> String {
+    let mut default_profile = String::new();
+    if(gender == String::from("Male")) {
+        default_profile  = String::from("../image-bank/boy-default-profile.jpg");
+    } else {
+        default_profile = String::from("../image-bank/girl-default-profile.jpg");
+    }
+    return default_profile;
+}
+
 extern crate rocket_contrib;
 use rocket_contrib::json::Json;
 mod email_addr;
@@ -156,19 +169,29 @@ use email_addr::{Validate_Email, valid_email};
 
 
 #[post("/register", data = "<user>")]
-pub fn register(user: Json<User>) { 
-    let connection = establish_connection();
+pub fn register(user: Json<User>) -> String { 
+    let conn = establish_connection();
     
+    use diesel::select;
+    let now = select(diesel::dsl::now).get_result::<SystemTime>(&conn).unwrap();
+
     let new_user = User {
         user_name:      user.user_name.to_string(),
+        user_gender:    user.user_gender.to_string(),
         user_email:     user.user_email.to_string(),
         user_password:  user.user_password.to_string(),
-        create_date:    user.create_date.to_string(),
         user_profile:   user.user_profile.clone(),
         user_role:      user.user_role.clone(),
         phone_number:   user.phone_number.clone()
     };
-    insert_user(&connection, new_user);
+
+    if(insert_user(&conn, new_user.clone()) == DuplicateEmail::Exist) {
+        return format!("Register complete!!!")
+    } else if (insert_user(&conn, new_user.clone()) == DuplicateEmail::Nonexist) {
+        return format!("Email already exist");
+    } else {
+        return format!("Something went wrong when trying to Registering");
+    }
 }
 
 use self::models::{loginInfo};
@@ -188,7 +211,6 @@ pub fn login(log_info: Json<loginInfo>) -> String {
                 string = generate_token(_user.user_name.to_string(),   
                                         _user.user_password.to_string(), 
                                         role.to_string());
-                // check_user_role(string.clone());
                 break;
             } else {
                 string = format!("Log in Failed");  
@@ -296,6 +318,14 @@ pub fn updatePhone(newInfo: Json<updateItem>) -> String {
         format!("Something went wrong when trying to update Phone Number")
     }
 }
+
+#[get("/display")]
+pub fn displayUser() -> String {
+    let from_db = get_user(&establish_connection());
+    let json_str = serde_json::to_string_pretty(&from_db).unwrap();
+    return json_str;
+}
+
 use std::time::{SystemTime};
 extern crate jsonwebtoken;
 use jsonwebtoken::{Header, decode, Validation};

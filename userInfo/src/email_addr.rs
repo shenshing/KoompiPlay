@@ -11,3 +11,12 @@ pub fn valid_email(email: &String) -> Validate_Email {
         false => return Validate_Email::invalidEmail,
     }
 }
+
+#[derive(PartialEq)]
+pub enum DuplicateEmail {
+    Exist,
+    Nonexist,
+}
+// pub fn is_unique_email(email: String) -> bool {
+    
+// }

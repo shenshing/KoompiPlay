@@ -1,0 +1,46 @@
+header h1 {
+    text-align: center;
+}
+
+body #main-form {
+    background-color: rgba(153, 153, 153, 0.74);
+    font-size: 20px;
+    width: 100%;
+    margin: auto;
+    /* text-align: center; */
+    /* margin-left: 100px; */
+    /* margin-right: 100px; */
+}
+
+#main-form input{
+    width: 250px;
+    display: block;
+    padding: 12px 20px;
+    border-radius: 5px;
+    margin-left: 200px;
+    /* text-align: center; */
+}
+
+#main-form label {
+    margin-left: 200px;
+    /* margin: auto; */
+}
+
+#main-form select {
+    display: block;
+    /* padding: 12px 20px; */
+    padding: 12px 20px;
+    /* width: 100%; */
+    margin-left: 200px; 
+    /* margin: auto; */
+}
+
+#main-form input[type=submit] {
+    /* margin-left: 220px;
+    margin-top: 20px; */
+    /* margin: auto; */
+    /* margin-top: 20px; */
+    margin-top: 20px;
+    /* margin-left: 220px; */
+    padding: 14px 20px;
+}

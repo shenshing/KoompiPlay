@@ -5,30 +5,32 @@ extern crate serde;
 
 use serde::{Deserialize, Serialize};
 
+use std::time::SystemTime;
 use super::schema::users;
-#[derive(Insertable, Deserialize, PartialEq)]
+#[derive(Insertable, Deserialize, PartialEq, Clone)]
 #[table_name="users"]
 pub struct User {
     pub user_name:      String,
+    pub user_gender:    String,
     pub user_email:     String,
     pub user_password:  String,
-    pub create_date:    String,
+    // pub create_date:    SystemTime,
     pub user_profile:   Option<String>,
     pub user_role:      Option<String>,
-    pub phone_number:   Option<String>,
+    pub phone_number:   String,
 }
 
-
-#[derive(Queryable, Deserialize, PartialEq)]
+#[derive(Queryable, Deserialize, PartialEq, Debug, Serialize)]
 pub struct _User {
     pub user_id:        i32,
     pub user_name:      String,
+    pub user_gender:    String,
     pub user_email:     String,
     pub user_password:  String,
-    pub create_date:    String,
+    pub create_date:    SystemTime,
     pub user_profile:   Option<String>,
     pub user_role:      Option<String>,
-    pub phone_number:   Option<String>,
+    pub phone_number:   String,
 }
 
 use rocket::{Request, Data, Outcome::*};
@@ -41,15 +43,16 @@ impl FromDataSimple for User {
     type Error = String;
 
     fn from_data(req: &Request, data: Data) -> data::Outcome<Self, String> {
-
+            let now = SystemTime::now();
             let new_user = User {
                 user_name:      String::from("username"),
+                user_gender:    String::from("user gender"),
                 user_email:     String::from("user email"),
                 user_password:  String::from("user password"),
-                create_date:    String::from("date time"),
+                // create_date:    now,
                 user_profile:   Some(String::from("user profile")),
                 user_role:      Some(String::from("user role")),
-                phone_number:   Some(String::from("023 322 233"))
+                phone_number:   String::from("023 322 233")
             };
         Success(new_user)
     }

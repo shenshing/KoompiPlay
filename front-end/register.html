@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KoompiPlay Register</title>
+    <link rel="stylesheet" href="registerStyle.css">
+</head>
+<body>
+    <header>
+        <h1>Register Form</h1>
+    </header>
+
+    <body>
+        <form id="main-form">
+            <div>
+                <label>Full Name</label>
+                <input type="text" id="name">
+            </div>
+            <div>
+                <label>Email</label>
+                <input type="text" id="email">
+            </div>
+            <div>
+                <label>Gender</label>
+                <select id="gender">
+                    <option value="" hidden>Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div>
+                <label>Password</label>
+                <input type="text" id="password">
+            </div>
+            <div>
+                <label>Phone Number</label>
+                <input type="text" id="phone">
+            </div>
+            
+            <div>
+                <input type="submit" value="Submit">
+            </div>
+        </form>
+
+        <div>
+            <button id="getText">Get Text</button>
+        </div>
+
+        <div id="output"></div>
+
+        <script>
+            document.getElementById('main-form').addEventListener('submit', registerUser);
+
+            function registerUser(e) {
+                e.preventDefault();
+            
+                let user_name = document.getElementById('name').value;
+                let user_email = document.getElementById('email').value;
+                let user_gender = document.getElementById('gender').value;
+                let user_password = document.getElementById('password').value;
+                let user_phone = document.getElementById('phone').value;
+
+                fetch('http://localhost:8000/register', {
+                    method: 'POST',
+                    headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_name: user_name,
+                        user_gender: user_gender,
+                        user_email: user_email,
+                        user_password: user_password,
+                        phone_number: user_phone,
+                    })
+                })
+                .then((data) => {
+                    alert("Login Success");
+                })
+                .catch((error) => {
+                    alert(err);
+                })
+            }
+
+            document.getElementById('getText').addEventListener('click', getText);
+
+            function getText() {
+                fetch('http://localhost:8000/admin')
+                    .then((res) => rest.text())
+                    .then((data) => {
+                        document.getElementById('output').innerHTML = data;
+                    })
+                    .catch((err) => console.log(err))
+                // console.log(123);
+            }
+
+
+        </script>
+
+        
+    </body>
+</body>
+</html>

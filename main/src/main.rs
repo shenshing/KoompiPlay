@@ -9,6 +9,8 @@ use userInfo::insert_user;
 
 extern crate diesel;
 use self::userInfo::*;
+
+extern crate rocket_cors;
 // use userInfo::{login, 
 //                admin_dashboard, 
 //                user_dashboard, 
@@ -18,6 +20,8 @@ use self::userInfo::*;
 //                updateName};
 
 fn main() {
+
+    let cors = rocket_cors::CorsOptions::default().to_cors().unwrap();;
 
     rocket::ignite()
         .mount("/", routes![register, 
@@ -31,7 +35,9 @@ fn main() {
                             updatePassword,
                             updateProfile,
                             updateRole,
-                            updatePhone])
+                            updatePhone,
+                            displayUser])
+        .attach(cors)
         .launch();
 
 }
