@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="user.css">
+    <title>Document</title>
+</head>
+<body>
+    <header class="main-header">User Information</header>
+    <div id="input">
+        <label>input username: </label>
+        <input type="text" id="inputName" placeholder="username">
+    </div>
+
+    <form id="input-form">
+        <div>
+            <input type="submit" Value="Submit">
+        </div>
+    </form>
+
+    
+
+    <form class="main-form">
+        <div>
+            <label>ID: </label>
+            <input type="number" name="id" id="id">
+        </div>
+        <div>
+            <label>Username: </label>
+            <input type="text" name="name" id="name">
+        </div>
+        <div>
+            <label>Profile:</label>
+            <input type="image" src="" alt="Profile Picture" id="profile_img">
+        </div>
+    </form>
+
+    <script>
+        document.getElementById('input-form').addEventListener('submit', getUser);
+        function getUser(e) {
+            e.preventDefault();
+
+            let input_name = document.getElementById('inputName').value;
+
+            console.log(input_name);
+
+            fetch('http://localhost:8000/user', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name_arg: input_name,
+                })
+            })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+                console.log(data.id);
+                console.log(data.username);
+                console.log(data.profile);
+                document.getElementById('id').value = data.id;
+                document.getElementById('name').value = data.username;
+                document.getElementById('profile_img').src = data.profile;
+            })
+        }
+    </script>
+
+
+
+
+</body>
+</html>

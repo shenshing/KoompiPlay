@@ -42,7 +42,7 @@ use std::fmt;
 // }
 /*===================== Storage =========================*/
 use super::schema::storages;
-#[derive(Insertable, Serialize, Deserialize)]
+#[derive(Queryable, Insertable, Serialize, Deserialize, Debug)]
 #[table_name="storages"]
 pub struct Storage {
     pub id: i32,
