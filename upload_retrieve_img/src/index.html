@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+    <div>
+        <label>input image id: </label>
+        <input type="text" id="image_id">
+    </div>
+
+
+    <form id="form1">
+        <div>
+            <input type="submit" value="Submit">
+        </div>
+    </form>
+        
+    <body>
+    
+    
+    
+    
+    
+    
+        <form id="image-test">
+            <div>
+                <label>Profile Picture: </label>
+                <input type="image" src="" alt="Profile Image" id="image">
+            </div>
+            <div>
+                <label>test:</label>
+                <input type="text" id="test_image">
+            </div>
+        </form>
+
+        <script>
+            document.getElementById("form1").addEventListener("submit", getImage);
+
+            function getImage(e) {
+                e.preventDefault();
+                let user_input = document.getElementById('image_id').value;
+                // console.log(user_input);
+
+                fetch('http://localhost:8000/img', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: user_input,
+                    })
+                })
+                .then((res) => res.url)
+                .then((data) => {
+                    // document.getElementById('image').src = data;
+                    // document.getElementById('image').src = "http://farm4.staticflickr.com/3691/11268502654_f28f05966c_m.jpg";
+                    // document.getElementById('image').src = "http://localhost:8000/back";
+                    document.getElementById('image').src = "http://localhost:8000/ret_img/gQuJ";
+                    // document.getElementById('test_imgae').value = data;
+                })
+            }
+        </script>
+    
+
+
+
+
+    </body>
+
+
+
+
+</body>
+</html>

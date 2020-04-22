@@ -1,0 +1,1 @@
+/home/koompi/Documents/koompi-play-production/upload_retrieve_img/test_img/target/debug/libtest_img.rlib: /home/koompi/Documents/koompi-play-production/upload_retrieve_img/test_img/src/lib.rs /home/koompi/Documents/koompi-play-production/upload_retrieve_img/test_img/src/models.rs /home/koompi/Documents/koompi-play-production/upload_retrieve_img/test_img/src/schema.rs

@@ -24,6 +24,7 @@ use rocket_multipart_form_data::{
     RawField,
 };
 
+// #[derive(Serialize)]
 use rocket_raw_response::RawResponse;
 
 // #[get("/")]
@@ -103,26 +104,172 @@ fn upload(content_type: &ContentType, data: Data) -> Result<RawResponse, &'stati
 
 use std::io::BufReader;
 use std::io;
+
+
+// pub fn get_image_back(content_type: &ContentType, name: PasteID<'_>) -> Result<RawResponse, &'static str> {
 #[get("/back")]
-pub fn get_image_back(content_type: &ContentType) -> Result<RawResponse, &'static str> {
-    let mut file = File::open("/home/koompi/Desktop/upload_retrieve_img/save_image1.jpeg").unwrap();
-    println!("file : {:?}", file);
+pub fn get_image_back() -> Result<RawResponse, &'static str> {
+// pub fn get_image_back(name: PasteID<'_>) -> Result<RawResponse, &'static str> {
+    // let mut file = File::open("/home/koompi/Desktop/upload_retrieve_img/save_image1.jpeg").unwrap();
+    let mut file = File::open("/home/koompi/Documents/koompi-play-production/upload_retrieve_img/userName-gQuJ").unwrap();
+    println!("file: {:?}", file);
+
+    // let mut file = File::open("image-bank/boy-default-profile.jpg").unwrap();
+    // let mut file = File::open("userName-d")
+    // println!("inside back");
+    // let mut f_string = format!("image-bank/{name}", name = name);
+    // let mut file = File::open(f_string).unwrap();
+    // println!("file : {:?}", file);
     
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer).unwrap();
     println!("{:?}", buffer);
-    let file_name = String::from("userName-CWLd");
+    // let file_name = String::from("userName-CWLd");
+    let file_name = String::from("a");
+    // let file_name = name;
 
     // Ok(RawResponse::from_vec(buffer, Some(file_name), content_type))
     Ok(RawResponse::from_vec(buffer, Some(file_name), Some(mime::IMAGE_STAR)))
 }
 
 
+use serde::{Deserialize, Serialize};
+#[derive(Deserialize, Serialize)]
+pub struct Image_ID {
+    // id: i32
+    id: String
+}
+
+use rocket::{Request, Outcome::*};
+use rocket::data::{self, FromDataSimple};
+
+impl FromDataSimple for Image_ID {
+    type Error = String;
+
+    fn from_data(req: &Request, data: Data) -> data::Outcome<Self, String> {
+        
+        let new_image = Image_ID {
+            id: String::from("0")
+        };
+
+        Success(new_image)
+    }  
+}
+
+extern crate rocket_contrib;
+use rocket_contrib::json::Json;
+
+
+
+
+
+/*--------send image back to browser (WORKING)-----------*/
+#[post("/img", data="<image_id>")]
+// fn retrieve(id: PasteID<'_>) -> Result<RawResponse, &'static str> {
+// fn retrieve(id: Json<PasteID<'_>>) -> Result<RawResponse, &'static str> {
+fn retrieve(image_id: Json<Image_ID>) -> Result<RawResponse, &'static str> {
+    // println!("{}", id);
+    // let filename = format!("upload1/{id}", id = id);
+    let file_format = format!("image-bank/{id}", id = image_id.id);
+    let mut file = File::open(file_format).unwrap();
+
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).unwrap();
+    println!("{:?}", buffer);
+
+    let name = String::from("a");
+
+    Ok(RawResponse::from_vec(buffer, Some(name), Some(mime::IMAGE_STAR)))
+}
+
+#[get("/ret_img/<id>")]
+fn retrieve_img(id: PasteID<'_>) -> Result<RawResponse, &'static str> {
+    let file_format = format!("image-bank/{id}", id = id);
+    let mut file = File::open(file_format).unwrap();
+
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).unwrap();
+    println!("{:?}", buffer);
+    let name = String::from("a");
+    Ok(RawResponse::from_vec(buffer, Some(name), Some(mime::IMAGE_STAR)))
+}
+
+/*------------test return url------------------------*/
+// extern crate url;
+// use url::{Url, ParseError};
+
+// #[get("/")]
+// pub fn return_url() -> Url {
+//     Url::parse("http://[:::1]").unwrap()
+// }
+
+/*
+impl Serialize for RawResponse {
+    fn serialize<S>(&self, serialzer: S) -> Result<S::Ok, S::Error>
+    where 
+        S: Serializer,
+    {
+        serializer.serialize_
+    }
+}
+
+#[post("/img", data="<image_id>")]
+// fn retrieve(id: PasteID<'_>) -> Result<RawResponse, &'static str> {
+// fn retrieve(id: Json<PasteID<'_>>) -> Result<RawResponse, &'static str> {
+fn retrieve(image_id: Json<Image_ID>) -> Json<RawResponse> {
+    // println!("{}", id);
+    // let filename = format!("upload1/{id}", id = id);
+    let file_format = format!("image-bank/{id}", id = image_id.id);
+    let mut file = File::open(file_format).unwrap();
+
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).unwrap();
+    println!("{:?}", buffer);
+
+    let name = String::from("a");
+
+    Json(RawResponse::from_vec(buffer, Some(name), Some(mime::IMAGE_STAR)))
+}
+*/
+/*
+#[get("/img/<id>")]
+// fn retrieve(id: PasteID<'_>) -> Result<RawResponse, &'static str> {
+fn retrieve(id: PasteID<'_>) -> Result<RawResponse, &'static str> {
+    // println!("{}", id);
+    // let filename = format!("upload1/{id}", id = id);
+    let file_format = format!("image-bank/{id}", id = id);
+    let mut file = File::open(file_format).unwrap();
+
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).unwrap();
+    println!("{:?}", buffer);
+
+    let name = String::from("a");
+
+    Ok(RawResponse::from_vec(buffer, Some(name), Some(mime::IMAGE_STAR)))
+}
+*/
+
 // extern crate image;
 // use image::GenericImageView;
 // use image::io::Reader;
 
+/*--------------test with real database--------------*/
+#[macro_use]
+extern crate diesel;
+// extern crate dotenv;
+
+use diesel::prelude::*;
+use diesel::pg::PgConnection;
+// use dotenv::dotenv;
+use std::env;
+
+// pub fn establish_connection
+
+extern crate rocket_cors;
+
 fn main() {
+    let cors = rocket_cors::CorsOptions::default().to_cors().unwrap();;
     rocket::ignite()
         // .attach(StaticResponse::fairing(|resources| {
         //     static_resources_initialize!(
@@ -135,6 +282,10 @@ fn main() {
         .mount("/", routes![index])
         .mount("/", routes![upload])
         .mount("/", routes![get_image_back])
+        .mount("/", routes![retrieve])
+        .mount("/", routes![retrieve_img])
+        // .mount("/", routes![back])
+        .attach(cors)
         .launch();
 
 

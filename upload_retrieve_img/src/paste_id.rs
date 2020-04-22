@@ -11,6 +11,7 @@ use rand::{self, Rng};
 const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 /// A _probably_ unique paste ID.
+// #[derive(Debug)]
 pub struct PasteID<'a>(Cow<'a, str>);
 
 impl<'a> PasteID<'a> {
