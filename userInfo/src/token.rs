@@ -107,7 +107,7 @@ pub fn generate_token(login_name: String, login_password: String, login_role: St
         iss:            String::from("koompiPlay"),
         sub:            String::from("login"),
         user_name:      login_name,
-        user_password:  login_password, 
+        user_password:  login_password,
         user_role:      login_role,
     };
 
@@ -116,7 +116,7 @@ pub fn generate_token(login_name: String, login_password: String, login_role: St
 }
 
 pub fn decode_token(token: String) -> jsonwebtoken::TokenData<Claims> {
-    let ok_token = &token[6..];
-    println!("{}", ok_token);
-    jsonwebtoken::decode::<Claims>(&ok_token, "secret".as_ref(), &Validation::default()).unwrap()
+    // let ok_token = &token[6..];
+    // println!("{}", ok_token);
+    jsonwebtoken::decode::<Claims>(&token, "secret".as_ref(), &Validation::default()).unwrap()
 }

@@ -37,8 +37,8 @@ pub fn insert_user(conn: &PgConnection, user: User) -> DuplicateEmail {
     let insert_result = match diesel::insert_into(users::table)
         .values(&new_user)
         .execute(conn) {
-            Ok(ok) => DuplicateEmail::Exist,
-            Err(err) => DuplicateEmail::Nonexist,
+            Ok(ok) => DuplicateEmail::Nonexist,
+            Err(err) => DuplicateEmail::Exist,
     };
     return insert_result;
 }
@@ -75,6 +75,35 @@ pub fn remove_user(userName: String, userPassword: String) -> deleteMessage {
         return deleteMessage::Unsuccess;
     }
 }
+
+//////////////////////////////////////////
+#[derive(Debug, PartialEq)]
+pub enum Find {
+    Found,
+    Notfound,
+}
+pub fn filter_user(token: String) -> Find {
+    use self::schema::users::dsl::{users, user_name, user_password};
+    let dec_token = decode_token(token);
+
+    // println!("{:#?}", dec_token);
+    let name = dec_token.claims.user_name;
+    let password = dec_token.claims.user_password;
+
+    let result = users.filter(user_name.like(name))
+        .filter(user_password.like(password))
+        .execute(&establish_connection())
+        // .get_result(&establish_connection())
+        .unwrap();
+    if(result == 0) {
+        return Find::Notfound;
+    } else {
+        return Find::Found;
+    }
+}
+
+
+
 
 #[derive(Debug, PartialEq)]
 pub enum updateMessage {
@@ -152,20 +181,230 @@ pub fn update_phone(userName: String, userPassword: String, newUserPhone: String
     }
 }
 
+//change path to localhost
 pub fn set_default_profile(gender: String) -> String {
     let mut default_profile = String::new();
     if(gender == String::from("Male")) {
-        default_profile  = String::from("../image-bank/boy-default-profile.jpg");
+        default_profile = String::from("http://localhost:8000/get_profile/EOk1");
     } else {
-        default_profile = String::from("../image-bank/girl-default-profile.jpg");
+        default_profile = String::from("http://localhost:8000/get_profile/cQrw");
     }
     return default_profile;
 }
 
+// pub fn update_profile(userName: String, userPassword: String, newUserProfile: String) -> updateMessage {
+//     use self::schema::users::dsl::{users, user_name, user_profile};
+
+//     let update_pro = diesel::update(users.filter(user_name.eq(userName))
+//         .filter(user_password.eq(userPassword)))
+//         .set(user_profile.eq(newUserProfile))
+//         .execute(&establish_connection());
+
+//     if(update_pro == Ok(1)) {
+//         return updateMessage::Success;
+//     } else {
+//         return updateMessage::Unsuccess;
+//     }
+// }
+
+/*move this function to last after successful*/
+const name_length: usize = 4;
+use rocket_multipart_form_data::{
+    MultipartFormData, MultipartFormDataError, MultipartFormDataField, MultipartFormDataOptions,
+    RawField,
+};
+use rocket::Data;
+use rocket::http::ContentType;
+
+
+// #[post("/upload", data = "<data>")]
+// pub fn upload_profile(content_type: &ContentType, data: Data) -> Result<RawResponse, &'static str> {
+//     let mut options = MultipartFormDataOptions::new();
+//     options.allowed_fields.push(
+//         MultipartFormDataField::raw("image")
+//             .size_limit(32 * 1024 * 1024)
+//             .content_type_by_string(Some(mime::IMAGE_STAR))
+//             .unwrap(),
+//     );
+
+//     let mut multipart_form_data = match MultipartFormData::parse(content_type, data, options) {
+//         Ok(multipart_form_data) => multipart_form_data,
+//         Err(err) => {
+//             match err {
+//                 MultipartFormDataError::DataTooLargeError(_) => {
+//                     return Err("The file is too large.")
+//                 }
+//                 MultipartFormDataError::DataTypeError(_) => {
+//                     return Err("The file is not an image.")
+//                 }
+//                 _ => panic!("{:?}", err),
+//             }
+//         }
+//     };
+
+//     let image = multipart_form_data.raw.remove("image");
+
+//     match image {
+//         Some(image) => {
+//             match image {
+//                 RawField::Single(raw) => {
+//                     let content_type = raw.content_type;
+//                     let file_name = format!("{}", PasteID::new(name_length));
+//                     let data = raw.raw;
+                    
+//                     // let file_fmt = format!("/home/koompi/Documents/koompi-play-production/upload_retrieve_img/image-bank/{}", file_name);
+//                                             // /home/koompi/Documents/koompi-play-production/userInfo/image-bank
+//                     let file_fmt = format!("/home/koompi/Documents/koompi-play-production/userInfo/image-bank/{}", file_name);
+//                     let mut file = File::create(file_fmt).unwrap();
+                    
+//                     let write_res = file.write(&data[0..]).unwrap();
+
+//                     Ok(RawResponse::from_vec(data, Some(file_name), content_type))
+//                 }
+//                 RawField::Multiple(_) => unreachable!(),
+//             }
+//         }
+//         None => Err("Please input a file."),
+//     }
+// }
+
+
+// #[derive(Debug, PartialEq)]
+// pub enum Find {
+//     Found,
+//     Notfound,
+// }
+//upload to specific users
+
+#[post("/uploadto/<token>", data = "<data>")]
+pub fn upload_profile(content_type: &ContentType, data: Data, token: String) -> Result<RawResponse, &'static str> {
+    
+    let token_decode = decode_token(token.clone());
+    let name =  token_decode.claims.user_name;
+    let password = token_decode.claims.user_password;
+
+    let res = filter_user(token);
+    
+    match res {
+        Find::Found => {
+            //user found
+            let mut options = MultipartFormDataOptions::new();
+            options.allowed_fields.push(
+                MultipartFormDataField::raw("image")
+                    .size_limit(32 * 1024 * 1024)
+                    .content_type_by_string(Some(mime::IMAGE_STAR))
+                    .unwrap(),
+            );
+
+            let mut multipart_form_data = match MultipartFormData::parse(content_type, data, options) {
+                Ok(multipart_form_data) => multipart_form_data,
+                Err(err) => {
+                    match err {
+                        MultipartFormDataError::DataTooLargeError(_) => {
+                            return Err("The file is too large.")
+                        }
+                        MultipartFormDataError::DataTypeError(_) => {
+                            return Err("The file is not an image.")
+                        }
+                        _ => panic!("{:?}", err),
+                    }
+                }
+            };
+
+            let image = multipart_form_data.raw.remove("image");
+
+            match image {
+                Some(image) => {
+                    match image {
+                        RawField::Single(raw) => {
+                            let content_type = raw.content_type;
+                            let file_name = format!("{}", PasteID::new(name_length));
+                            let data = raw.raw;
+                            
+                            // let file_fmt = format!("/home/koompi/Documents/koompi-play-production/upload_retrieve_img/image-bank/{}", file_name);
+                                                    // /home/koompi/Documents/koompi-play-production/userInfo/image-bank
+                            let file_fmt = format!("/home/koompi/Documents/koompi-play-production/userInfo/image-bank/{}", file_name);
+                            let mut file = File::create(file_fmt).unwrap();
+                            
+                            let write_res = file.write(&data[0..]).unwrap();
+                                /*update user profile image*/
+                                let new_profile_path = format!("http://localhost:8000/get_profile/{}", file_name);
+                                
+                                if(update_profile(name.clone(), password.clone(), new_profile_path.clone()) == updateMessage::Success) {
+                                    return Err("update user profile Successfully");
+                                } else if(update_profile(name.clone(), password.clone(), new_profile_path.clone()) == updateMessage::Unsuccess) {
+                                    return Err("update user profile Unsuccessful");
+                                } else {
+                                    // let st = format!("Something went wrong when trying to update \"userName : {} \" to \"userName : {} \"", userName.clone(), new_name.clone());
+                                    // let st = format!("Something wen wrong when trying to update profile");
+                                    return Err("Something wen wrong when trying to update profile");
+                                }
+                                
+                                /************************/
+                            Ok(RawResponse::from_vec(data, Some(file_name), content_type))
+                        }
+                        RawField::Multiple(_) => unreachable!(),
+                    }
+                }
+                None => Err("Please input a file."),
+            }
+        },
+        Find::Notfound => {
+            return Err("no user found");
+        }
+    }
+
+    
+    
+}
+
+//end upload to specific user
+mod paste_id;
+use std::fs::File;
+use std::io::prelude::*;
+
+use crate::paste_id::PasteID;
+extern crate rocket_multipart_form_data;
+extern crate rocket_raw_response;
+
+use rocket_multipart_form_data::mime;
+use rocket_raw_response::RawResponse;
+
+#[get("/get_profile/<id>")]
+pub fn get_profile(id: PasteID<'_>) -> Result<RawResponse, &'static str> {
+    // let file_format = format!("image-bank/{id}", id = id);
+    let file_format = format!("/home/koompi/Documents/koompi-play-production/userInfo/image-bank/{id}", id = id);
+    let mut file = File::open(file_format).unwrap();
+
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).unwrap();
+    println!("{:?}", buffer);
+    let name = String::from("a");
+    Ok(RawResponse::from_vec(buffer, Some(name), Some(mime::IMAGE_STAR)))
+}
+
+
+/*end */
 extern crate rocket_contrib;
 use rocket_contrib::json::Json;
 mod email_addr;
 use email_addr::{Validate_Email, valid_email};
+
+
+use serde::{Deserialize, Serialize};
+#[derive(Serialize, Deserialize)]
+pub struct Token {
+    token: String,
+}
+
+#[post("/test_token", data = "<token>")]
+pub fn test_token(token: Json<Token>) -> Json<Token> {
+    Json(
+        Token {
+            token: String::from("hello")
+        }
+    )
+}
 
 
 #[post("/register", data = "<user>")]
@@ -174,6 +413,8 @@ pub fn register(user: Json<User>) -> String {
     
     use diesel::select;
     let now = select(diesel::dsl::now).get_result::<SystemTime>(&conn).unwrap();
+
+
 
     let new_user = User {
         user_name:      user.user_name.to_string(),
@@ -185,10 +426,12 @@ pub fn register(user: Json<User>) -> String {
         phone_number:   user.phone_number.clone()
     };
 
-    if(insert_user(&conn, new_user.clone()) == DuplicateEmail::Exist) {
+    println!("new_user : {:#?}", new_user);
+
+    if(insert_user(&conn, new_user.clone()) == DuplicateEmail::Nonexist) {
         return format!("Register complete!!!")
-    } else if (insert_user(&conn, new_user.clone()) == DuplicateEmail::Nonexist) {
-        return format!("Email already exist");
+    } else if (insert_user(&conn, new_user.clone()) == DuplicateEmail::Exist) {
+        return format!("Email already exist")
     } else {
         return format!("Something went wrong when trying to Registering");
     }
@@ -222,9 +465,9 @@ pub fn login(log_info: Json<loginInfo>) -> String {
     return string;
 }
 
-#[post("/delete", data = "<token>")]
-pub fn self_destroy(token: String) -> String {
-    let dec_res = decode_token(token);
+#[post("/delete", data = "<token_>")]
+pub fn self_destroy(token_: Json<Token>) -> String {
+    let dec_res = decode_token(token_.token.clone());
     let userName = dec_res.claims.user_name;
     let userPassword = dec_res.claims.user_password;
 
@@ -326,6 +569,50 @@ pub fn displayUser() -> String {
     return json_str;
 }
 
+//eg: localhost::8000/shing (display username after route to get "user information")
+#[post("/userData", data = "<token_>")]
+pub fn userData(token_: Json<Token>) -> Json<_User> {
+    use self::schema::users::dsl::{users, user_name, user_password};
+    let find_result = filter_user(token_.token.clone());
+
+    let decode = decode_token(token_.token.clone());
+    let name = decode.claims.user_name;
+    let password = decode.claims.user_password;
+
+    if(find_result == Find::Found) {
+        let user = users.filter(user_name.like(name))
+        .filter(user_password.like(password))
+        .get_result(&establish_connection())
+        .unwrap();
+        return Json(user);
+    } else {
+        let user = _User::new();
+        return Json(user);
+    }
+}
+
+// pub fn user_Info(token: String) -> User {
+//     let dec = decode_token(token);
+
+//     let user_name = dec.claims.user_name;
+//     let user_gender = dec.claims.user_gender;
+//     let user_email = dec.claims.user_email;
+//     let user_password = dec.claims.user_password;
+//     let user_profile = dec.claims.user_profile;
+//     let user_role = dec.claims.user_role;
+//     let phone_number = dec.claims.phone_number;
+
+//     return User {
+//         user_name,
+//         user_gender,
+//         user_email,
+//         user_password,
+//         user_profile,
+//         user_role,
+//         phone_number,
+//     };
+// }
+
 use std::time::{SystemTime};
 extern crate jsonwebtoken;
 use jsonwebtoken::{Header, decode, Validation};
@@ -356,14 +643,14 @@ pub fn delete_sucess() -> String {
 
 use rocket::response::Redirect;
 use token::decode_token;
-#[post("/checking", data = "<token>")]
-pub fn check_user_role(token: String) -> Redirect {
+#[post("/checking", data = "<token_>")]
+pub fn check_user_role(token_: Json<Token>) -> Redirect {
     //I don't why it has "token=a;sldkfja;sldjfa;lsdf" 
     //when i try to send token from postman so i need to delete some string before
     //token to make it become ValidToken
     // let dec_res = jsonwebtoken::decode::<Claims>(&ok_token, "secret".as_ref(), &Validation::default()).unwrap();
     
-    let dec_res = decode_token(token);
+    let dec_res = decode_token(token_.token.clone());
     let user_role = dec_res.claims.user_role;
     println!("user role = {}", user_role);
 

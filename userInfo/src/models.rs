@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use std::time::SystemTime;
 use super::schema::users;
-#[derive(Insertable, Deserialize, PartialEq, Clone)]
+#[derive(Insertable, Deserialize, PartialEq, Clone, Debug)]
 #[table_name="users"]
 pub struct User {
     pub user_name:      String,
@@ -33,6 +33,22 @@ pub struct _User {
     pub phone_number:   String,
 }
 
+impl _User {
+    pub fn new() -> _User {
+        let time = SystemTime::now();
+        _User {
+            user_id:        0i32,
+            user_name:      String::from("no result"),
+            user_gender:    String::from("no result"),
+            user_email:     String::from("no result"),
+            user_password:  String::from("no result"),
+            create_date:    time,
+            user_profile:   Some(String::from("no result")),
+            user_role:      Some(String::from("no result")),
+            phone_number:   String::from("no reuslt")
+        }
+    }
+}
 use rocket::{Request, Data, Outcome::*};
 use rocket::data::{self, FromDataSimple};
 
@@ -104,3 +120,26 @@ impl FromDataSimple for updateItem {
         Success(update_info)
     }
 }
+
+#[derive(Deserialize)]
+pub struct test_img {
+    pub path: String,
+}
+
+impl FromDataSimple for test_img {
+    type Error = String;
+
+    fn from_data(req: &Request, data: Data) -> data::Outcome<Self, String> {
+
+        let new_img = test_img {
+            path: String::from("default-path"),
+        };
+
+        Success(new_img)
+    }
+}
+
+// #[derive(Deserialize)]
+// pub struct data_struct {
+//     data: Data,
+// }
