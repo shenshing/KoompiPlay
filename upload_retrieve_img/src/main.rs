@@ -78,16 +78,25 @@ fn upload(content_type: &ContentType, data: Data) -> Result<RawResponse, &'stati
                     let content_type = raw.content_type;
                     // let file_name = raw.file_name.unwrap_or("Image".to_string());
                     /*------------*/
-                    let user = String::from("userName");
-                    let image_name = PasteID::new(name_length);
-                    let file_name = format!("{}-{image_name}", user, image_name = image_name);
+                    // let user = String::from("userName");
+                    // let image_name = PasteID::new(name_length);
+                    // let file_name = format!("{}-{image_name}", user, image_name = image_name);
+                    let file_name = format!("{}", PasteID::new(name_length));
                     /*-----------*/
                     let data = raw.raw;
 
                     // println!("{:?}", data);
                     // println!("content_type: {:?}", content_type);
                     // println!("file_name: {:?}", file_name);
-                    let mut file = File::create(file_name.clone()).unwrap();
+
+
+                    // let file_path = PathBuf::from("/home/koompi/Documents/koompi-play-production/upload_retrieve_img/image-bank");
+                    // let file = File::create(file_name.clone()).unwrap();
+                    // let write_res = file.write(file_path, &data[0..]).unwrap();
+                    
+                    let file_fmt = format!("/home/koompi/Documents/koompi-play-production/upload_retrieve_img/image-bank/{}", file_name);
+                    let mut file = File::create(file_fmt).unwrap();
+                    // let mut file = File::create(file_name.clone()).unwrap();
 
                     let write_res = file.write(&data[0..]).unwrap();
 
@@ -127,6 +136,7 @@ pub fn get_image_back() -> Result<RawResponse, &'static str> {
     // let file_name = String::from("userName-CWLd");
     let file_name = String::from("a");
     // let file_name = name;
+
 
     // Ok(RawResponse::from_vec(buffer, Some(file_name), content_type))
     Ok(RawResponse::from_vec(buffer, Some(file_name), Some(mime::IMAGE_STAR)))
@@ -182,6 +192,51 @@ fn retrieve(image_id: Json<Image_ID>) -> Result<RawResponse, &'static str> {
     Ok(RawResponse::from_vec(buffer, Some(name), Some(mime::IMAGE_STAR)))
 }
 
+
+// #[get("/")]
+// pub fn return_url(res: Result<RawResponse, &'static str>){
+    
+//     let result = match res {
+//         Ok(ok) => format!("ok"),
+//         Err(err) => format!("err"),
+//     };
+
+//     println!("{}", result);
+// }
+
+#[derive(Serialize)]
+pub struct ST {
+    string: String
+}
+
+#[post("/img1", data="<image_id>")]
+pub fn retrieve1(image_id: Json<Image_ID>) -> Json<ST> {
+    let file_format = format!("image-bank/{id}", id = image_id.id);
+    let mut file = File::open(file_format).unwrap();
+
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).unwrap();
+    println!("{:?}", buffer);
+
+    let name = String::from("a");
+
+    let mut st = String::new();
+
+    let res: Result<RawResponse, &'static str> = Ok(RawResponse::from_vec(buffer, Some(name), Some(mime::IMAGE_STAR))); 
+
+    match res {
+        Ok(ok) => st = format!("http://localhost:8000/ret_img/{}", image_id.id),
+        Err(err) => st = format!("{}", err)
+    }
+
+    let r = ST {
+        string: st
+    };
+
+    return Json(r);
+       
+}
+
 #[get("/ret_img/<id>")]
 fn retrieve_img(id: PasteID<'_>) -> Result<RawResponse, &'static str> {
     let file_format = format!("image-bank/{id}", id = id);
@@ -194,13 +249,34 @@ fn retrieve_img(id: PasteID<'_>) -> Result<RawResponse, &'static str> {
     Ok(RawResponse::from_vec(buffer, Some(name), Some(mime::IMAGE_STAR)))
 }
 
+#[post("/test_str", data="<image_id>")]
+pub fn test_str(image_id: Json<Image_ID>) -> String {
+    let st1 = format!("http://localhost:8000/ret_img/{}", image_id.id);
+    println!("st1 = {}", st1);
+
+    let st2 = format!("http://localhost:8000/ret_img/{image_id}", image_id = image_id.id);
+    println!("st2 = {}", st2);
+
+    return String::from("Ok")
+}
+
+
+
 /*------------test return url------------------------*/
 // extern crate url;
-// use url::{Url, ParseError};
+// use url::{ParseError};
+
+// #[derive(Responder)]
+// use url::Url;
+// // pub struct Url();
 
 // #[get("/")]
 // pub fn return_url() -> Url {
-//     Url::parse("http://[:::1]").unwrap()
+//     let str_url = format!("https://github.com/rust-lang/rust/issues?labels=E-easy&state=open");
+    
+//     let typ_url = Url::parse(&str_url).unwrap();
+
+//     return typ_url;
 // }
 
 /*
@@ -269,6 +345,10 @@ use std::env;
 extern crate rocket_cors;
 
 fn main() {
+
+    // let res = return_url();
+    // println!("{:?}", res);
+
     let cors = rocket_cors::CorsOptions::default().to_cors().unwrap();;
     rocket::ignite()
         // .attach(StaticResponse::fairing(|resources| {
@@ -284,6 +364,9 @@ fn main() {
         .mount("/", routes![get_image_back])
         .mount("/", routes![retrieve])
         .mount("/", routes![retrieve_img])
+        .mount("/", routes![retrieve1])
+        .mount("/", routes![test_str])
+        // .mount("/", routes![return_url])
         // .mount("/", routes![back])
         .attach(cors)
         .launch();

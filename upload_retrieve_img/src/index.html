@@ -46,7 +46,7 @@
                 let user_input = document.getElementById('image_id').value;
                 // console.log(user_input);
 
-                fetch('http://localhost:8000/img', {
+                fetch('http://localhost:8000/img1', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
@@ -56,12 +56,16 @@
                         id: user_input,
                     })
                 })
-                .then((res) => res.url)
+                .then((res) => res.json())
                 .then((data) => {
                     // document.getElementById('image').src = data;
                     // document.getElementById('image').src = "http://farm4.staticflickr.com/3691/11268502654_f28f05966c_m.jpg";
                     // document.getElementById('image').src = "http://localhost:8000/back";
-                    document.getElementById('image').src = "http://localhost:8000/ret_img/gQuJ";
+                    
+                    // document.getElementById('image').src = "http://localhost:8000/ret_img/gQuJ";
+                    console.log(data.string);
+                    document.getElementById('image').src = data.string;
+
                     // document.getElementById('test_imgae').value = data;
                 })
             }
