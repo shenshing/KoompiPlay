@@ -36,7 +36,12 @@ fn main() {
                             updateProfile,
                             updateRole,
                             updatePhone,
-                            displayUser])
+                            displayUser,
+                            userData,
+                            test_token,
+                            upload_profile, //
+                            get_profile])
+                            // upload_to])
         .attach(cors)
         .launch();
 
