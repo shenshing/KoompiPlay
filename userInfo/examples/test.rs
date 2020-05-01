@@ -23,11 +23,12 @@ fn main() {
 
     // let cors = rocket_cors::CorsOptions::default().to_cors().unwrap();
     
-    // rocket::ignite()
-    //     .mount("/", routes![get_profile])
-    //     .mount("/", routes![upload])
-    //     .attach(cors)
-    //     .launch();
+    rocket::ignite()
+        .mount("/", routes![get_profile])
+        .mount("/", routes![upload])
+        // .mount("/", routes![])
+        .attach(cors)
+        .launch();
 
     // let file_name = String::from("a.txt");
     // let file_fmt = format!("/home/koompi/Documents/koompi-play-production/userInfo/image-bank/{}", file_name);

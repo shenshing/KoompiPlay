@@ -52,8 +52,6 @@ impl _User {
 use rocket::{Request, Data, Outcome::*};
 use rocket::data::{self, FromDataSimple};
 
-// Always use a limit to prevent DoS attacks.
-const LIMIT: u64 = 256;
 
 impl FromDataSimple for User {
     type Error = String;
@@ -138,8 +136,3 @@ impl FromDataSimple for test_img {
         Success(new_img)
     }
 }
-
-// #[derive(Deserialize)]
-// pub struct data_struct {
-//     data: Data,
-// }

@@ -116,7 +116,5 @@ pub fn generate_token(login_name: String, login_password: String, login_role: St
 }
 
 pub fn decode_token(token: String) -> jsonwebtoken::TokenData<Claims> {
-    // let ok_token = &token[6..];
-    // println!("{}", ok_token);
     jsonwebtoken::decode::<Claims>(&token, "secret".as_ref(), &Validation::default()).unwrap()
 }

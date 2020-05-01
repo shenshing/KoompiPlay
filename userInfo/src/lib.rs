@@ -35,7 +35,7 @@ pub fn insert_user(conn: &PgConnection, user: User) -> DuplicateEmail {
     };
 
     let insert_result = match diesel::insert_into(users::table)
-        .values(&new_user)
+        .values(new_user)
         .execute(conn) {
             Ok(ok) => DuplicateEmail::Nonexist,
             Err(err) => DuplicateEmail::Exist,
@@ -192,20 +192,6 @@ pub fn set_default_profile(gender: String) -> String {
     return default_profile;
 }
 
-// pub fn update_profile(userName: String, userPassword: String, newUserProfile: String) -> updateMessage {
-//     use self::schema::users::dsl::{users, user_name, user_profile};
-
-//     let update_pro = diesel::update(users.filter(user_name.eq(userName))
-//         .filter(user_password.eq(userPassword)))
-//         .set(user_profile.eq(newUserProfile))
-//         .execute(&establish_connection());
-
-//     if(update_pro == Ok(1)) {
-//         return updateMessage::Success;
-//     } else {
-//         return updateMessage::Unsuccess;
-//     }
-// }
 
 /*move this function to last after successful*/
 const name_length: usize = 4;
@@ -269,13 +255,8 @@ use rocket::http::ContentType;
 // }
 
 
-// #[derive(Debug, PartialEq)]
-// pub enum Find {
-//     Found,
-//     Notfound,
-// }
-//upload to specific users
 
+//upload to specific users
 #[post("/uploadto/<token>", data = "<data>")]
 pub fn upload_profile(content_type: &ContentType, data: Data, token: String) -> Result<RawResponse, &'static str> {
     
@@ -321,8 +302,6 @@ pub fn upload_profile(content_type: &ContentType, data: Data, token: String) -> 
                             let file_name = format!("{}", PasteID::new(name_length));
                             let data = raw.raw;
                             
-                            // let file_fmt = format!("/home/koompi/Documents/koompi-play-production/upload_retrieve_img/image-bank/{}", file_name);
-                                                    // /home/koompi/Documents/koompi-play-production/userInfo/image-bank
                             let file_fmt = format!("/home/koompi/Documents/koompi-play-production/userInfo/image-bank/{}", file_name);
                             let mut file = File::create(file_fmt).unwrap();
                             
@@ -414,17 +393,7 @@ pub fn register(user: Json<User>) -> String {
     use diesel::select;
     let now = select(diesel::dsl::now).get_result::<SystemTime>(&conn).unwrap();
 
-
-
-    let new_user = User {
-        user_name:      user.user_name.to_string(),
-        user_gender:    user.user_gender.to_string(),
-        user_email:     user.user_email.to_string(),
-        user_password:  user.user_password.to_string(),
-        user_profile:   user.user_profile.clone(),
-        user_role:      user.user_role.clone(),
-        phone_number:   user.phone_number.clone()
-    };
+    let new_user = user.into_inner();
 
     println!("new_user : {:#?}", new_user);
 
@@ -590,28 +559,6 @@ pub fn userData(token_: Json<Token>) -> Json<_User> {
         return Json(user);
     }
 }
-
-// pub fn user_Info(token: String) -> User {
-//     let dec = decode_token(token);
-
-//     let user_name = dec.claims.user_name;
-//     let user_gender = dec.claims.user_gender;
-//     let user_email = dec.claims.user_email;
-//     let user_password = dec.claims.user_password;
-//     let user_profile = dec.claims.user_profile;
-//     let user_role = dec.claims.user_role;
-//     let phone_number = dec.claims.phone_number;
-
-//     return User {
-//         user_name,
-//         user_gender,
-//         user_email,
-//         user_password,
-//         user_profile,
-//         user_role,
-//         phone_number,
-//     };
-// }
 
 use std::time::{SystemTime};
 extern crate jsonwebtoken;
