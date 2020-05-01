@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+
+
+    <form action="http://localhost:8000/upload" method="post" enctype="multipart/form-data" class="form" id="myForm">
+        <input type="file" name="image" id="fileUpload">
+        <input type="submit" value="Upload Image" name="submit">
+    </form>
+
+
+    <!-- <script>
+    
+        const myForm = document.getElementById('myForm');
+        const inpFile = document.getElementById('inpFile'); 
+        
+        myForm.addEventListener("submit", e => {
+            e.preventDefault();
+
+            // const endpoint
+            const formData = new FormData();
+
+            // console.log(inpFile.files);
+            
+            // let files = event.target.files;
+            // console.log(files);
+
+            // formData.append("inpFile", inpFile.files[0]);
+            console.log(inpFile.files[0]);
+            formData.append("inpFile", inpFile.files[0]);
+
+            // console.log(formData);
+                //    http://localhost:8000/upload
+            fetch('http://localhost:8000/upload', {
+                method: 'POST',
+                body: formData
+            })
+            // .then((res) => console.log(res))
+            .catch(console.error);
+        });
+    
+    </script> -->
+
+    <!-- <form id="main-form">
+        <div>
+            <input type="file" onchange="readURL(this);" />
+            <img id="blah" src="#" alt="Your Image" />
+            <input type="submit" value="Submit">
+        </div>
+        
+    </form>
+   
+
+    <script>
+    
+    function readURL(input) {
+        if(input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                $('#blah')
+                    .attr('src', e.target.result)
+                    .width(200)
+                    .height(200);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+
+    document.getElementById('main-form').addEventListener('submit', uploadImage);
+
+    function uploadImage(e) {
+        e.preventDefault();
+
+        // let image = document.getElementById('blah').src;
+        // let image = document.getElementById('blah').value;
+        // let image = document.getElementById('blah');
+        document.querySelector('#blah').addEventListener('change', event => {
+            handleImageUpload(event)
+        })
+
+        console.log(image);
+
+    }
+
+    
+    </script> -->
+
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+body #info-form {
+    background-color: grey;
+    /* font-size: 18px; */
+    /* width: 100%; */
+}
+
+#info-form label {
+    font-size: 25px;
+}
+/* body label {
+    font-size: 18px;
+} */
+
+body input[type="date"] {
+    display: block;
+    width: 50%;
+    /* padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px; */
+}
+body input[type="text"] {
+    width: 50%;
+    display: block;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    /* padding: 10px; */
+    /* padding-top: 20px; */
+}
+
+#image {
+    /* padding: 100px; */
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}

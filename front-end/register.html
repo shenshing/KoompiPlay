@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.min.js"></script>
+
     <title>KoompiPlay Register</title>
     <link rel="stylesheet" href="registerStyle.css">
 </head>
@@ -38,19 +42,54 @@
                 <label>Phone Number</label>
                 <input type="text" id="phone">
             </div>
-            
+            <!-- <div>
+                <input type="file" onchange="readURL(this);" />
+                <img id="blah" src="#" alt="Your Image" />
+            </div>  -->
             <div>
                 <input type="submit" value="Submit">
             </div>
         </form>
 
-        <div>
+        <!-- <div>
             <button id="getText">Get Text</button>
-        </div>
+        </div> -->
 
         <div id="output"></div>
 
+        
+        <!-- <script>
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        $('#blah')
+                            .attr('src', e.target.result);
+                    };
+
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        </script> -->
+
         <script>
+
+            function readURL(input) {
+                if(input.files && input.files[0]) {
+                    var reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        $('#blah')
+                            .attr('src', e.target.result)
+                            .width(200)
+                            .height(200);
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+            
+
             document.getElementById('main-form').addEventListener('submit', registerUser);
 
             function registerUser(e) {
@@ -61,41 +100,58 @@
                 let user_gender = document.getElementById('gender').value;
                 let user_password = document.getElementById('password').value;
                 let user_phone = document.getElementById('phone').value;
+                // let user_profile = document.getElementById('blah').value;
+                // let user_profile = document.getElementById('blah').src;
+
+                // console.log(user_profile);
 
                 fetch('http://localhost:8000/register', {
                     method: 'POST',
                     headers: {
-                            'Accept': 'application/json, text/plain, */*',
-                            'Content-type': 'application/json'
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-type': 'application/json'
                     },
                     body: JSON.stringify({
                         user_name: user_name,
                         user_gender: user_gender,
                         user_email: user_email,
+                        // user_profile: user_profile,
                         user_password: user_password,
                         phone_number: user_phone,
                     })
                 })
+                .then((res) => res.text())
                 .then((data) => {
-                    alert("Login Success");
+                    alert(data);
                 })
-                .catch((error) => {
+                .catch((err) => {
                     alert(err);
                 })
+                // {
+                    // alert("Register Success");
+                    // alert(data.text);
+                    /*new route for check if email already exist*/
+
+                // })
+                // .catch((error) => {
+                //     alert(err);
+                // })
             }
 
-            document.getElementById('getText').addEventListener('click', getText);
+            // document.getElementById('getText').addEventListener('click', getText);
 
-            function getText() {
-                fetch('http://localhost:8000/admin')
-                    .then((res) => rest.text())
-                    .then((data) => {
-                        document.getElementById('output').innerHTML = data;
-                    })
-                    .catch((err) => console.log(err))
-                // console.log(123);
-            }
+            // function getText() {
+            //     fetch('http://localhost:8000/admin')
+            //         .then((res) => res.text())
+            //         .then((data) => {
+            //             // document.getElementById('output').innerHTML = data;
+            //             console.log(data);
+            //         })
+            //         .catch((err) => console.log(err))
+            //     // console.log(123);
+            // }
 
+            
 
         </script>
 
