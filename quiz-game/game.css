@@ -1,0 +1,28 @@
+body {
+    background-color: pink;
+}
+
+.container {
+    text-align: center;
+}
+
+#main-header {
+    text-align: center;
+    font-size: 100px;
+}
+
+#form-game input[type=submit] {
+    font-size: 20px;
+}
+
+#form-game input[type=text] {
+    font-size: 50px;
+}
+
+#form-game input[type=checkbox] {
+    font-size: 50px;
+}
+
+#form-game label {
+    font-size: 20px;
+}

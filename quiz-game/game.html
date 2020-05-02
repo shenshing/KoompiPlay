@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="game.css">
+    <title>Document</title>
+</head>
+<body>
+
+    <body class="container">
+        
+        <form id="form-game">
+
+            <div>
+                <input type="text" id="question" placeholder="Question go down here">
+            </div>
+
+            <div>
+                <input type="radio" id="answer1" name="answer" value="Answer1">
+                <label for="answer1">Answer1</label>
+            
+                <input type="radio" id="answer2" name="answer" value="Answer2">
+                <label for="answer2">Answer2</label>
+            
+                <input type="radio" id="answer3" name="answer" value="Answer3">
+                <label for="answer3">Answer3</label>
+           
+                <input type="radio" id="answer4" name="answer" value="Answer4">
+                <label for="answer4">Answer4</label>
+            </div>
+
+            <div>
+                <input type="submit" id="btn-submit" onclick="myFunction()">
+            </div>
+
+            <div>
+                <button id="btn-begin">begin the journey</button>
+            </div>
+
+
+        </form>
+
+        <!-- <button onclick="myFunction()"> Click me</button> -->
+
+        
+
+        <script>
+
+            let myData = []
+
+            // console.log(myData);
+            
+
+            function myFunction(e) {
+                e.preventDefault()
+                console.log(myData);
+
+                return false;
+                
+            }
+            
+            
+            fetch("http://localhost:8000/question")
+                .then((res) => res.json())
+                .then((data) => {
+                    
+                    myData.push(data)
+
+                   
+                })
+        </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- <script>
+            // document.getElementById("form-game").addEventListener("submit", getQuestion);
+            // document.getElementById("form-game").addEventListener("onclick", getQuestion);
+            var begin = document.getElementById('btn-begin');
+            
+            begin.onclick = getQuestion();
+            
+            function getQuestion(e) {
+                // e.preventDefault();
+                // Event.stop(e);
+                console.log("hello world");
+
+                fetch("http://localhost:8000/question1")
+                    .then((res) => res.json())
+                    .then((data) => {
+                        console.log(data);
+                        console.log(data.question);
+                        document.getElementById('question').value = data.question;
+                        document.getElementById('answer1').value = data.answer;
+                    })
+                // e.preventDefault();
+            }
+
+            function check_result
+
+
+        </script> -->
+    </body>
+
+</body>
+</html>
