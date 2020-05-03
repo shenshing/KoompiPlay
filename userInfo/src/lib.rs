@@ -548,16 +548,97 @@ pub fn userData(token_: Json<Token>) -> Json<_User> {
     let name = decode.claims.user_name;
     let password = decode.claims.user_password;
 
+
+    // let user = _User {
+    //     user_id: 1i32,
+    //     user_name: String::from("default username"),
+    //     user_gender: String::from("default gender"),
+    //     user_email: String::from("default@email.com"),
+    //     user_password: String::from("default password"),
+    //     create_date: SystemTime::now(),
+    //     user_profile: Some(String::from("default profile")),
+    //     user_role: Some(String::from("default role")),
+    //     phone_number: String::from("default number")
+    // };
+
     if(find_result == Find::Found) {
         let user = users.filter(user_name.like(name))
         .filter(user_password.like(password))
         .get_result(&establish_connection())
         .unwrap();
+        println!("true in back-end: {:#?}", user);
         return Json(user);
     } else {
         let user = _User::new();
+        // println!("false in back-end: {:#?}", user);
         return Json(user);
     }
+}
+
+use rocket::http::{Cookies, Cookie};
+#[post("/test_login", data = "<log_info>")]
+pub fn test_login(mut cookies: Cookies<'_>, log_info: Json<loginInfo>) -> Redirect {
+    use self::schema::users::dsl::*;
+
+    let connection = establish_connection();
+
+    let user_list = get_user(&connection);
+    let mut string = String::new();
+
+    for _user in user_list.iter() {
+        if(_user.user_name.trim() == log_info.user_name.trim()) {
+            if(_user.user_password.trim() == log_info.user_password.trim()) {
+                let role = _user.user_role.as_ref().unwrap();
+                string = generate_token(_user.user_name.to_string(),   
+                                        _user.user_password.to_string(), 
+                                        role.to_string());
+                cookies.add(Cookie::new("token", string.clone()));
+                // println!("{:#?}", cookies);
+                break;
+            } else {
+                string = format!("Log in Failed");  
+            }
+        } else {
+            string = format!("Log in Failed");
+        }
+    }
+    return string;
+}
+
+// #[get("/a")]
+// pub fn a() -> String {
+//     String::fr
+// }
+
+
+
+#[get("/userData1")]
+pub fn userData1(cookies: Cookies<'_>) -> Json<_User> {
+    use self::schema::users::dsl::{users, user_name, user_password};
+
+    let token = cookies.get("token").unwrap().value();
+    // println!("token: {}", token.clone());
+
+
+    let find_result = filter_user(token.clone().to_string());
+
+    let decode = decode_token(token.clone().to_string());
+    let name = decode.claims.user_name;
+    let password = decode.claims.user_password;
+
+    if(find_result == Find::Found) {
+        let user = users.filter(user_name.like(name))
+        .filter(user_password.like(password))
+        .get_result(&establish_connection())
+        .unwrap();
+        println!("true in back-end: {:#?}", user);
+        return Json(user);
+    } else {
+        let user = _User::new();
+        // println!("false in back-end: {:#?}", user);
+        return Json(user);
+    }
+    // return Json(user);
 }
 
 use std::time::{SystemTime};
