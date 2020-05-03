@@ -40,7 +40,9 @@ fn main() {
                             userData,
                             test_token,
                             upload_profile, //
-                            get_profile])
+                            get_profile,
+			    test_login,
+			    userData1])
                             // upload_to])
         .attach(cors)
         .launch();
