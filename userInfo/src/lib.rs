@@ -102,6 +102,31 @@ pub fn filter_user(token: String) -> Find {
     }
 }
 
+pub fn get_user_by_name_password(name: String, password: String) -> Result<_User, diesel::result::Error> {
+// pub fn get_user_by_name_password(name: String, password: String) {
+    use self::schema::users::dsl::{users, user_name, user_password};
+
+    // let result = users.filter(user_name.like(name))
+    //     .filter(user_password.like(password))
+    //     .get_result(&establish_connection());
+        // .unwrap();
+
+
+    // println!("result: {:#?}", result);
+    // if(result == 0) {
+    //     return Err(String::from("not found"));
+    // } else {
+    //     return Ok(result);
+    // }
+    match users.filter(user_name.eq(name))
+        .filter(user_password.eq(password))
+        .get_result::<_User>(&establish_connection()) {
+        Ok(user) => return Ok(user),
+        Err(err) => return Err(err),
+    }
+    // return Ok(result);
+}
+
 
 
 
@@ -408,8 +433,12 @@ pub fn register(user: Json<User>) -> String {
 
 use self::models::{loginInfo};
 #[post("/login", data = "<log_info>")]
-pub fn login(log_info: Json<loginInfo>) -> String {
+pub fn login(log_info: Json<loginInfo>) -> Json<String> {
     use self::schema::users::dsl::*;
+
+    //print header
+
+
 
     let connection = establish_connection();
 
@@ -431,7 +460,7 @@ pub fn login(log_info: Json<loginInfo>) -> String {
             string = format!("Log in Failed");
         }
     }
-    return string;
+    return Json(string);
 }
 
 #[post("/delete", data = "<token_>")]
@@ -615,9 +644,9 @@ pub fn test_login(mut cookies: Cookies<'_>, log_info: Json<loginInfo>) -> String
 #[get("/userData1")]
 pub fn userData1(cookies: Cookies<'_>) -> Json<_User> {
     use self::schema::users::dsl::{users, user_name, user_password};
-
+    println!("{:#?}", cookies);
     let token = cookies.get("token").unwrap().value();
-    // println!("token: {}", token.clone());
+    println!("token: {}", token.clone());
 
 
     let find_result = filter_user(token.clone().to_string());
@@ -635,11 +664,41 @@ pub fn userData1(cookies: Cookies<'_>) -> Json<_User> {
         return Json(user);
     } else {
         let user = _User::new();
-        // println!("false in back-end: {:#?}", user);
         return Json(user);
     }
-    // return Json(user);
 }
+
+// use rocket::Request;
+use self::models::ApiKey;
+#[get("/userData2")]
+pub fn userData2(key: ApiKey) -> Json<_User>{
+    use self::schema::users::dsl::{users, user_name, user_password};
+    
+    let token = key.into_inner();
+
+    println!("token: {}", token);
+
+
+    let find_result = filter_user(token.clone().to_string());
+
+    let decode = decode_token(token.clone().to_string());
+    let name = decode.claims.user_name;
+    let password = decode.claims.user_password;
+
+    if(find_result == Find::Found) {
+        let user = users.filter(user_name.like(name))
+        .filter(user_password.like(password))
+        .get_result(&establish_connection())
+        .unwrap();
+        println!("true in back-end: {:#?}", user);
+        return Json(user);
+    } else {
+        let user = _User::new();
+        return Json(user);
+    }
+}
+
+
 
 use std::time::{SystemTime};
 extern crate jsonwebtoken;

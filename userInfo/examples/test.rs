@@ -7,6 +7,7 @@
 
 // use userInfo::static_rocket_route_info_for_get_profile;
 // use userInfo::static_rocket_route_info_for_upload;
+use userInfo::get_user_by_name_password;
 
 use userInfo::{Find, filter_user};
 
@@ -14,7 +15,8 @@ use std::fs::File;
 use std::io::prelude::*;
 
 extern crate rocket_cors;
-
+// use userInfo::models::sensitive
+use userInfo::models::static_rocket_route_info_for_sensitive;
 // rocket = { version = "0.4.2", features = ["serde"]}
 fn main() {
     // let token = String::from("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJrb29tcGlQbGF5IiwiZXhwIjoxNjAwNTk0MjQwLCJpYXQiOjE1ODY0MjQ2NDAsImlzcyI6Imtvb21waVBsYXkiLCJzdWIiOiJsb2dpbiIsInVzZXJfbmFtZSI6InNoaW5nIiwidXNlcl9wYXNzd29yZCI6IjEyMyIsInVzZXJfcm9sZSI6IlVzZXIifQ.mi7rDF5AcQcQeUhKJhSTGKTvH5_W9tAE5TydZcPx8jU");
@@ -24,10 +26,11 @@ fn main() {
     // let cors = rocket_cors::CorsOptions::default().to_cors().unwrap();
     
     rocket::ignite()
-        .mount("/", routes![get_profile])
-        .mount("/", routes![upload])
+        // .mount("/", routes![get_profile])
+        // .mount("/", routes![upload])
         // .mount("/", routes![])
-        .attach(cors)
+        .mount("/", routes![sensitive])
+        // .attach(cors)
         .launch();
 
     // let file_name = String::from("a.txt");
@@ -42,5 +45,7 @@ fn main() {
     //     Find::Found => println!("User Found"),
     //     Find::Notfound => println!("User not Found"),
     // }
+
+    get_user_by_name_password(String::from("shing"), String::from("123"));
 
 }

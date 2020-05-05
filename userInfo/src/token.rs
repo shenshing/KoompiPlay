@@ -116,5 +116,6 @@ pub fn generate_token(login_name: String, login_password: String, login_role: St
 }
 
 pub fn decode_token(token: String) -> jsonwebtoken::TokenData<Claims> {
+    println!("in decode token: {}", token);
     jsonwebtoken::decode::<Claims>(&token, "secret".as_ref(), &Validation::default()).unwrap()
 }

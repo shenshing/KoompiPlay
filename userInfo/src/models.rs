@@ -72,11 +72,108 @@ impl FromDataSimple for User {
     }
 }
 
+
+/*****************************/
+use rocket::Outcome;
+use rocket::http::Status;
+use rocket::request::{self, FromRequest};
+// use crate::get_user_by_name_password;
+// extern crate userInfo;
+// use super::userInfo::get_user_by_name_password;
+// use userInfo::get_user_by_name_password;
+
+// #[derive(Debug)]
+// pub enum UserError {
+//     NotFound,
+//     InvalidToken,
+// }
+
+// use crate::token::decode_token;
+// impl<'a, 'r> FromRequest<'a, 'r> for _User {
+//     type Error = UserError;
+
+//     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
+//         let send_token: Vec<_> = request.headers().get("token_key").collect();
+
+//         let token_st: String = send_token[0].to_string();
+
+//         let claim = decode_token(token_st);
+
+//         let name = claim.claims.user_name;
+//         let password = claim.claims.user_password;
+
+//         if(claim.claims.aud == String::from("koompiPlay")) {
+//             let user = get_user_by_name_password(name, password);
+
+//             return Outcome::Success(user.unwrap());
+//         } else {
+//             return Outcome::Failure((Status::BadRequest, UserError::NotFound));
+//         }
+//     }
+// }
+// #[derive(Debug)]
+pub struct ApiKey(String);
+
+impl ApiKey {
+    #[inline(always)]
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+}
+
+#[derive(Debug)]
+pub enum ApiKeyError {
+    Missing,
+    Invalid,
+    Expired,
+    BadCount,
+}
+
+use crate::token::decode_token;
+pub struct Token(String);
+fn is_valid_token(token: &str) -> bool {
+
+    let claim = decode_token(token.to_string());
+
+    if(claim.claims.aud == String::from("koompiPlay")) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
+impl<'a, 'r> FromRequest<'a, 'r> for ApiKey {
+    type Error = ApiKeyError;
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
+        let keys: Vec<_> = request.headers().get("token").collect();
+
+        match keys.len() {
+            0 => Outcome::Failure((Status::BadRequest, ApiKeyError::Missing)),
+            1 if is_valid_token(keys[0]) => Outcome::Success(ApiKey(keys[0].to_string())),
+            1 => Outcome::Failure((Status::BadRequest, ApiKeyError::Invalid)),
+            _ => Outcome::Failure((Status::BadRequest, ApiKeyError::BadCount)),
+        }
+    }
+}
+
+#[get("/sensitive")]
+pub fn sensitive(key: ApiKey) -> &'static str {
+    println!("key: {}", key.into_inner());
+    // let st = format!("{:#?}", key);
+    // println!("st: {}", st);
+    "Sensitive Data"
+}
+/****************************/
+
 #[derive(Deserialize)]
 pub struct loginInfo {
     pub user_name: String,
     pub user_password: String,
 }
+
+
 impl FromDataSimple for loginInfo {
     type Error = String;
 
@@ -90,6 +187,8 @@ impl FromDataSimple for loginInfo {
         Success(login_info)
     }
 }
+
+
 
 #[derive(Deserialize)]
 pub struct updateItem {

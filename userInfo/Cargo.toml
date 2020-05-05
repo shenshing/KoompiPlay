@@ -27,4 +27,7 @@ rocket-multipart-form-data = "0.8.1"
 rocket_cors = "0.5.2"
 
 
+http = "0.2.1"
+
+
 
