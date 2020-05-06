@@ -30,6 +30,10 @@ use rocket_cors::{
     Cors, CorsOptions 
 };
 
+fn ok() {
+ println!("Heollo World");
+}
+
 fn main() {
 
     // let cors = rocket_cors::CorsOptions::default()
