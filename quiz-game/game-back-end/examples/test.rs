@@ -16,6 +16,9 @@ use game_back_end::models::{PlayerQue};
 
 extern crate rocket_cors;
 
+extern crate userInfo;
+use userInfo::get_user_by_name_password;
+
 
 fn main() {
 
@@ -30,5 +33,12 @@ fn main() {
         .mount("/", routes![return_winner])   
         .attach(cors)
         .launch();
-        
+
+
+    // let name = String::from("shing");
+    // let password = String::from("123");
+
+    // let result = get_user_by_name_password(name, password).unwrap();
+
+    // println!("{:#?}", result);        
 }

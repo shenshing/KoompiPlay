@@ -22,7 +22,7 @@ pub fn save_user_to_db(conn: &PgConnection, player: Player) -> Save_Result {
     let new_player = Player {
         playername: player.playername,
         score: player.score,
-        playdate: player.playdate,
+        // playdate: player.playdate,
         email: player.email
     };
 
@@ -41,7 +41,7 @@ pub fn playerque_to_player(playerque: PlayerQue, player: Player) -> Player {
     return Player {
         playername: playerque.playername,
         score:      playerque.score,
-        playdate:   playerque.playdate,
+        // playdate:   playerque.playdate,
         email:      playerque.email
     }
 }
@@ -49,21 +49,36 @@ pub fn playerque_to_player(playerque: PlayerQue, player: Player) -> Player {
 
 /* ENDPOINT PART */
 //an endpoint for get_player_info
+
+use userInfo::models::ApiKey;
+use userInfo::token::{decode_token};
+use userInfo::get_user_by_name_password;
+
 use rocket_contrib::json::Json;
-use crate::models::Player;
-#[post("/play_info", data="<p_data>")]
-pub fn save_player_data(p_data: Json<Player>) -> String {
+use crate::models::{Player, PlayResult};
+#[post("/play_info", data="<p_result>")]
+pub fn save_player_data(key: ApiKey, p_result: Json<PlayResult>) -> String {
+    // use crate::schema::users;
     // "player data saved"
+
+    let token = key.into_inner();
+
+    let claim = decode_token(token.clone().to_string());
+
+    let name = claim.claims.user_name;
+    let password = claim.claims.user_password;
+
+    let user = get_user_by_name_password(name, password).unwrap();
 
     let conn = establish_connection();
 
-    println!("p_data: {:#?}", p_data);
+    let player_save = Player {
+        playername: user.user_name,
+        score:      10i32,
+        email:      user.user_email
+    };
 
-    let player_data = p_data.into_inner();
-
-    println!("player data: {:#?}", player_data);
-
-    let save_res = save_user_to_db(&conn, player_data);
+    let save_res = save_user_to_db(&conn, player_save);
 
     let mut rt_st = String::new();
 
