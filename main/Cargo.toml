@@ -12,7 +12,7 @@ userInfo = { path = "../userInfo" }
 diesel = { version = "1.0.0", features = ["postgres", "chrono"] }
 chrono = { version = "0.4.10", features = ["serde"] }
 rocket_cors = "0.5.2"
-
+game-back-end = { path = "../quiz-game/game-back-end" }
 
 [dependencies.rocket_contrib]
 version = "0.4.4"

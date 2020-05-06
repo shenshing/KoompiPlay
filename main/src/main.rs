@@ -5,24 +5,14 @@
 
 extern crate userInfo;
 use userInfo::insert_user;
-// use userInfo::register;
+extern crate game_back_end;
+use self::game_back_end::user::*;
 
 extern crate diesel;
 use self::userInfo::*;
-
 extern crate rocket_cors;
 
-// use rocket_contrib::templates::Template;
 use rocket_contrib::templates::Template;
-// use rocket_contrib::templates::Template;
-// use userInfo::{login, 
-//                admin_dashboard, 
-//                user_dashboard, 
-//                error_dashboard, 
-//                check_user_role,
-//                self_destroy,
-//                updateName};
-
 
 use rocket::http::Method;
 use rocket_cors::{
@@ -30,24 +20,16 @@ use rocket_cors::{
     Cors, CorsOptions 
 };
 
-fn ok() {
- println!("Heollo World");
-}
-
 fn main() {
 
-    // let cors = rocket_cors::CorsOptions::default()
-    //     // .allow_credentials(true)
-    //     .send_wildcard(true)
-    //     .to_cors().unwrap();
 
 
     let allowed_origins = AllowedOrigins::some_exact(&[ // 4.
-        // "http://localhost:8080",
-        // "http://127.0.0.1:8080",
-        // "http://localhost:8000",
-        // "http://0.0.0.0:8000",
-        "http://127.0.0.1:5500"
+        "http://127.0.0.1:5500",
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
     ]);
 
     let cors = CorsOptions { 
@@ -85,7 +67,8 @@ fn main() {
                             get_profile,
 			                test_login,
 			                userData1,
-                            userData2])
+                            userData2,
+                            save_player_data])
         .attach(cors)
         .attach(Template::fairing())
         .launch();
