@@ -60,6 +60,7 @@ use crate::models::{Player, PlayResult};
 pub fn save_player_data(key: ApiKey, p_result: Json<PlayResult>) -> String {
     // use crate::schema::users;
     // "player data saved"
+    println!("inside play_info");
 
     let token = key.into_inner();
 
@@ -74,7 +75,7 @@ pub fn save_player_data(key: ApiKey, p_result: Json<PlayResult>) -> String {
 
     let player_save = Player {
         playername: user.user_name,
-        score:      10i32,
+        score:      p_result.into_inner().score,
         email:      user.user_email
     };
 

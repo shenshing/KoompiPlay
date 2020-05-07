@@ -66,7 +66,7 @@ impl FromDataSimple for Player {
 
 #[derive(Serialize, Deserialize)]
 pub struct PlayResult {
-    score: i32
+    pub score: i32
 }
 
 impl FromDataSimple for PlayResult {
