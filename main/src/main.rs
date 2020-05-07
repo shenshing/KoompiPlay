@@ -24,12 +24,13 @@ fn main() {
 
 
 
-    let allowed_origins = AllowedOrigins::some_exact(&[ // 4.
+    let allowed_origins = AllowedOrigins::some_exact(&[ 
         "http://127.0.0.1:5500",
         "http://localhost:3000",
         "http://localhost:3001",
         "http://localhost:3002",
         "http://localhost:3003",
+        // "chrome-extension://fhbjgbiflinjbdggehcddcbncdddomop"
     ]);
 
     let cors = CorsOptions { 
