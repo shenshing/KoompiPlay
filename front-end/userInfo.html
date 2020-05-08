@@ -61,24 +61,27 @@
 
 
     <script>
-        document.getElementById('form1').addEventListener('submit', getUser);
+        // document.getElementById('form1').addEventListener('submit', getUser);
+        var token = window.localStorage.getItem("token")
 
-        function getUser(e) {
-            e.preventDefault();
+        // function getUser(e) {
+            // e.preventDefault();
 
-            let rec_token = document.getElementById('token').value;
-            fetch('http://localhost:8000/userData', {
-                method: 'POST',
+            // let rec_token = document.getElementById('token').value;
+            fetch('http://localhost:8000/userData2',{
+                // Content-Types: "application/json"
+                method:  "GET",
+                // mod: 'same-origin',
                 headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type' : 'application/json'
-                },
-                body: JSON.stringify({
-                    token: rec_token,
-                })
+                    "Content-Type" : "application/json",
+                    // "Host" : "localhost:8000",
+                    // "Access-Control-Allow-Origi"
+                    "token": token
+                }
             })
             .then((res) => res.json())
             .then((data) => {
+                console.log(data);
                 document.getElementById('name').value = data.user_name;
                 document.getElementById('gender').value = data.user_gender;
                 document.getElementById('email').value = data.user_email;
@@ -87,10 +90,9 @@
                 document.getElementById('date').value = date;
                 document.getElementById('role').value = data.user_role;
                 document.getElementById('phone').value = data.phone_number;
-                // document.getElementById('image').src = "http://localhost:8000/get_profile/mx2U";
                 document.getElementById('image').src = data.user_profile;
             })
-        }
+        // }
     </script>
 </body>
 
